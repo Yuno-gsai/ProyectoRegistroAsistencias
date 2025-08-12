@@ -1,4 +1,6 @@
 <?php
+require_once 'DataBase/DatabaseConnection.php';
+
 try{
     $db = new DatabaseConnection();
     $conn = $db->getConnection();
