@@ -10,3 +10,4 @@ catch(Exception $e){
     echo "Error: " . $e->getMessage();
 }
 ?>
+<h1>hola mundo</h1>
