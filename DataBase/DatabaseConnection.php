@@ -27,7 +27,7 @@ class DatabaseConnection {
         $username   = getenv('DB_USERNAME') ?? 'adminmysql';
         $password   = getenv('DB_PASSWORD') ?? '';
         $database   = getenv('DB_DATABASE') ?? 'proyectoasistencia';
-        $sslCaPath  = getenv('DB_SSL_CA_PATH') ?? 'uploads/certificado.pem';
+        $sslCaPath  = getenv('DB_SSL_CA_PATH') ?? 'uploads/DigiCertGlobalRootCA.crt.pem';
 
         try {
             // Configuracion de opciones de PDO
@@ -36,16 +36,19 @@ class DatabaseConnection {
                 PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4",  // Configurar juego de caracteres
             ];
 
-            // Configurar SSL si existe el certificado
-            if ($sslCaPath && file_exists($sslCaPath)) {
-                $options[PDO::MYSQL_ATTR_SSL_CA] = $sslCaPath;
-            }
+            // Configurar SSL para Azure MySQL
+            $options[PDO::MYSQL_ATTR_SSL_CA] = $sslCaPath;
+            $options[PDO::MYSQL_ATTR_SSL_VERIFY_SERVER_CERT] = true;
             
-            // Crear DSN (Data Source Name)
-            $dsn = "mysql:host=$host;port=$port;charset=utf8mb4";
+            // Crear DSN (Data Source Name) incluyendo la base de datos
+            $dsn = "mysql:host=$host;port=$port;dbname=$database;charset=utf8mb4";
 
-            // Crear instancia de PDO
-            $this->conn = new PDO($dsn, $username, $password, $options);
+            // Crear instancia de PDO con manejo de errores mejorado
+            try {
+                $this->conn = new PDO($dsn, $username, $password, $options);
+            } catch (PDOException $e) {
+                throw new Exception("Error de conexión a la base de datos: " . $e->getMessage());
+            }
 
             // Verificar si la base de datos existe
             $stmt = $this->conn->prepare("SELECT SCHEMA_NAME FROM INFORMATION_SCHEMA.SCHEMATA WHERE SCHEMA_NAME = ?");
