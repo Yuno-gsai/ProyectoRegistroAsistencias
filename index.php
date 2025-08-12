@@ -1,2 +1,12 @@
-<h1>Hola mundo</h1>
-<h2>Hola mundo</h2>
+<?php
+try{
+    $db = new DatabaseConnection();
+    $conn = $db->getConnection();
+    if($conn){
+        echo "Conectado a la base de datos";
+    }
+}
+catch(Exception $e){
+    echo "Error: " . $e->getMessage();
+}
+?>
